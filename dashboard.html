@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EventFlow AI</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Razorpay -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <style>
+        body {
+            background: var(--gray-100);
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--white);
+            border-right: 1px solid var(--gray-200);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .sidebar-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .sidebar-logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: var(--white);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .user-details h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.125rem;
+        }
+
+        .user-details p {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            background: var(--white);
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .dashboard-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: var(--gray-600);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.primary { background: rgba(124, 58, 237, 0.1); color: var(--primary); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .stat-icon.info { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-change.positive { color: var(--success); }
+        .stat-change.negative { color: var(--danger); }
+
+        /* Content Sections */
+        .content-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Campaign Cards */
+        .campaigns-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .campaign-card {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .campaign-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .campaign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .campaign-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-draft { background: rgba(148, 163, 184, 0.1); color: var(--gray-600); }
+        .status-paused { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+        .campaign-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .campaign-meta {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+        }
+
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .campaign-stat {
+            text-align: center;
+        }
+
+        .campaign-stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .campaign-stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Subscription Banner */
+        .subscription-banner {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .banner-content h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .banner-content p {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .campaigns-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .stats-grid,
+            .campaigns-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-logo">
+                    <div class="sidebar-logo-icon">F</div>
+                    <span class="sidebar-logo-text">EventFlow AI</span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="overview">
+                    <i class="fas fa-home"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="nav-item" data-section="campaigns">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Campaigns</span>
+                </a>
+                <a href="#" class="nav-item" data-section="prospects">
+                    <i class="fas fa-users"></i>
+                    <span>Prospects</span>
+                </a>
+                <a href="#" class="nav-item" data-section="messages">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="#" class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-section="subscription">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Subscription</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <h4 id="userName">Loading...</h4>
+                        <p id="userPlan">Trial Plan</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%; margin-top: 1rem; padding: 0.5rem;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Welcome back, <span id="welcomeName">User</span>! 👋</h1>
+                <p class="dashboard-subtitle">Here's what's happening with your campaigns today</p>
+            </div>
+
+            <!-- Subscription Banner (if trial/inactive) -->
+            <div id="subscriptionBanner" class="subscription-banner" style="display: none;">
+                <div class="banner-content">
+                    <h3>🚀 Upgrade to unlock full potential</h3>
+                    <p>Get unlimited prospects, AI personalization, and priority support</p>
+                </div>
+                <button onclick="showSubscription()" class="btn btn-outline">
+                    View Plans
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalCampaigns">0</div>
+                    <div class="stat-label">Active Campaigns</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 12% from last month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalProspects">0</div>
+                    <div class="stat-label">Total Prospects</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 8% from last month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalMessages">0</div>
+                    <div class="stat-label">Messages Sent</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 23% from last month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon info">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">₹0</div>
+                    <div class="stat-label">Revenue Generated</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> 15% from last month
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Verification Banner -->
+            <div id="emailVerificationBanner" class="subscription-banner" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <div class="banner-content">
+                    <h3>📧 Verify your email address</h3>
+                    <p>Please verify your email to access all features</p>
+                </div>
+                <button onclick="resendVerification()" class="btn btn-outline">
+                    Resend Email
+                </button>
+            </div>
+
+            <!-- Payment History Section -->
+            <div class="content-section" id="paymentHistorySection" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">Payment History</h2>
+                </div>
+                <div id="paymentHistoryContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <h3 class="empty-title">No payments yet</h3>
+                        <p class="empty-text">Your payment history will appear here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaigns Section -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Campaigns</h2>
+                    <button class="btn btn-primary" onclick="createCampaign()">
+                        <i class="fas fa-plus"></i> New Campaign
+                    </button>
+                </div>
+
+                <div id="campaignsContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <h3 class="empty-title">No campaigns yet</h3>
+                        <p class="empty-text">Create your first campaign to start finding prospects and generating revenue</p>
+                        <button class="btn btn-primary" onclick="createCampaign()">
+                            <i class="fas fa-plus"></i> Create First Campaign
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+    <script>
+        // Check authentication
+        if (!auth.isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const result = await auth.getCurrentUser();
+            if (result.success) {
+                const user = result.user;
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('welcomeName').textContent = user.name.split(' ')[0];
+                document.getElementById('userPlan').textContent = user.plan.charAt(0).toUpperCase() + user.plan.slice(1) + ' Plan';
+                document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+
+                // Show email verification banner if not verified
+                if (!user.isEmailVerified) {
+                    document.getElementById('emailVerificationBanner').style.display = 'flex';
+                }
+
+                // Show upgrade banner if on trial
+                if (user.plan === 'trial' && user.isEmailVerified) {
+                    document.getElementById('subscriptionBanner').style.display = 'flex';
+                }
+
+                // Load payment history
+                await loadPaymentHistory();
+
+                // Update usage stats from user data
+                if (user.usage) {
+                    document.getElementById('totalProspects').textContent = user.usage.prospectsUsed || 0;
+                    document.getElementById('totalCampaigns').textContent = user.usage.campaignsCreated || 0;
+                    document.getElementById('totalMessages').textContent = user.usage.messagesGenerated || 0;
+                }
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load campaigns
+                const campaignsRes = await fetch(`${API_BASE_URL}/campaigns`, {
+                    headers: { 'Authorization': `Bearer ${auth.getToken()}` }
+                });
+                const campaignsData = await campaignsRes.json();
+                
+                if (campaignsData.success) {
+                    document.getElementById('totalCampaigns').textContent = campaignsData.campaigns?.length || 0;
+                    renderCampaigns(campaignsData.campaigns || []);
+                }
+
+                // Load prospects
+                const prospectsRes = await fetch(`${API_BASE_URL}/prospects`, {
+                    headers: { 'Authorization': `Bearer ${auth.getToken()}` }
+                });
+                const prospectsData = await prospectsRes.json();
+                
+                if (prospectsData.success) {
+                    document.getElementById('totalProspects').textContent = prospectsData.prospects?.length || 0;
+                }
+
+                // Load messages
+                const messagesRes = await fetch(`${API_BASE_URL}/messages`, {
+                    headers: { 'Authorization': `Bearer ${auth.getToken()}` }
+                });
+                const messagesData = await messagesRes.json();
+                
+                if (messagesData.success) {
+                    document.getElementById('totalMessages').textContent = messagesData.messages?.length || 0;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function renderCampaigns(campaigns) {
+            const container = document.getElementById('campaignsContainer');
+            
+            if (campaigns.length === 0) {
+                return; // Keep empty state
+            }
+
+            container.innerHTML = `
+                <div class="campaigns-grid">
+                    ${campaigns.map(campaign => `
+                        <div class="campaign-card">
+                            <div class="campaign-header">
+                                <div>
+                                    <h3 class="campaign-title">${campaign.name}</h3>
+                                    <p class="campaign-meta">${campaign.eventType}</p>
+                                </div>
+                                <span class="campaign-status status-${campaign.status}">${campaign.status}</span>
+                            </div>
+                            <div class="campaign-stats">
+                                <div class="campaign-stat">
+                                    <div class="campaign-stat-value">${campaign.results?.totalContacted || 0}</div>
+                                    <div class="campaign-stat-label">Contacted</div>
+                                </div>
+                                <div class="campaign-stat">
+                                    <div class="campaign-stat-value">${campaign.results?.totalReplies || 0}</div>
+                                    <div class="campaign-stat-label">Replies</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function createCampaign() {
+            alert('Campaign creation coming soon! This will integrate with EventFlow-AI.');
+        }
+
+        function showSubscription() {
+            window.location.href = '#pricing';
+        }
+
+        function logout() {
+            auth.logout();
+        }
+
+        // Initialize
+        loadUserData();
+        loadDashboardData();
+    </script>
+</body>
+</html>

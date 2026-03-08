@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EventFlow AI</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-mesh);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(rgba(124, 58, 237, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.5;
+        }
+
+        .auth-card {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-2xl);
+            padding: 3rem;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .auth-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            text-decoration: none;
+        }
+
+        .auth-logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .auth-logo-text {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--gray-900);
+        }
+
+        .auth-subtitle {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--danger);
+        }
+
+        .error-message {
+            display: none;
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .success-message {
+            display: none;
+            color: var(--success);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-checkbox label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+
+        .form-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .form-link:hover {
+            color: var(--primary-dark);
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--gray-300);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .btn-linkedin {
+            width: 100%;
+            padding: 1rem;
+            background: #0077b5;
+            color: white;
+            border: none;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .btn-linkedin:hover {
+            background: #006399;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-linkedin i {
+            font-size: 1.25rem;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .auth-footer p {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 2rem;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-bg-pattern"></div>
+        
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="auth-logo">
+                    <div class="auth-logo-icon">F</div>
+                    <span class="auth-logo-text">EventFlow AI</span>
+                </a>
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to your account to continue</p>
+            </div>
+
+            <div id="successMessage" class="success-message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="you@example.com"
+                        required
+                    >
+                    <div id="emailError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                    <div id="passwordError" class="error-message"></div>
+                </div>
+
+                <div class="form-options">
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" class="form-link">Forgot password?</a>
+                </div>
+
+                <div id="formError" class="error-message" style="margin-bottom: 1rem; text-align: center;"></div>
+
+                <button type="submit" id="loginBtn" class="btn btn-primary btn-auth">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <button onclick="loginWithLinkedIn()" class="btn-linkedin">
+                <i class="fab fa-linkedin"></i>
+                Sign in with LinkedIn
+            </button>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="signup.html">Sign up for free</a></p>
+                <p style="margin-top: 1rem;">
+                    <a href="index.html">← Back to home</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/auth.js"></script>
+    <script>
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Clear previous errors
+            hideError('emailError');
+            hideError('passwordError');
+            hideError('formError');
+            
+            // Get form values
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validate
+            let hasError = false;
+            
+            if (!validateEmail(email)) {
+                showError('emailError', 'Please enter a valid email address');
+                hasError = true;
+            }
+            
+            if (!validatePassword(password)) {
+                showError('passwordError', 'Password must be at least 6 characters');
+                hasError = true;
+            }
+            
+            if (hasError) return;
+            
+            // Show loading
+            setLoading('loginBtn', true);
+            
+            // Attempt login
+            const result = await auth.login(email, password);
+            
+            // Hide loading
+            setLoading('loginBtn', false);
+            
+            if (result.success) {
+                showSuccess('successMessage', 'Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } else {
+                showError('formError', result.message || 'Login failed. Please try again.');
+            }
+        });
+
+        // LinkedIn OAuth
+        function loginWithLinkedIn() {
+            auth.loginWithLinkedIn();
+        }
+
+        // Check if coming from OAuth callback
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            
+            if (error) {
+                showError('formError', 'OAuth authentication failed. Please try again.');
+            }
+            
+            // If already logged in, redirect
+            if (auth.isAuthenticated()) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

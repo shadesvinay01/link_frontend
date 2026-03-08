@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - EventFlow AI</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <style>
+        body {
+            background: var(--gray-100);
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .content-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form (shown initially) -->
+    <div id="loginForm" class="login-form">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">
+            <i class="fas fa-shield-alt"></i> Admin Access
+        </h2>
+        <form onsubmit="adminLogin(event)">
+            <div class="form-group">
+                <label>Admin Password</label>
+                <input type="password" id="adminPassword" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+    </div>
+
+    <!-- Admin Panel (hidden initially) -->
+    <div id="adminPanel" style="display: none;">
+        <div class="admin-container">
+            <!-- Header -->
+            <div class="admin-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 class="admin-title">Admin Panel</h1>
+                        <p style="color: var(--gray-600);">Manage users, campaigns, and system settings</p>
+                    </div>
+                    <button onclick="adminLogout()" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeUsers">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCampaigns">0</div>
+                    <div class="stat-label">Total Campaigns</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRevenue">₹0</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="content-section">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('users')">
+                        <i class="fas fa-users"></i> Users
+                    </div>
+                    <div class="tab" onclick="switchTab('payments')">
+                        <i class="fas fa-credit-card"></i> Payments
+                    </div>
+                    <div class="tab" onclick="switchTab('campaigns')">
+                        <i class="fas fa-bullhorn"></i> Campaigns
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="usersTab" class="tab-content active">
+                    <h2 class="section-title">All Users</h2>
+                    <div id="usersTable" style="overflow-x: auto;">
+                        <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            Loading users...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="paymentsTab" class="tab-content">
+                    <h2 class="section-title">Recent Payments</h2>
+                    <div id="paymentsTable" style="overflow-x: auto;">
+                        <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            Loading payments...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Campaigns Tab -->
+                <div id="campaignsTab" class="tab-content">
+                    <h2 class="section-title">All Campaigns</h2>
+                    <div id="campaignsTable" style="overflow-x: auto;">
+                        <p style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                            Loading campaigns...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        let adminPassword = '';
+
+        function adminLogin(event) {
+            event.preventDefault();
+            adminPassword = document.getElementById('adminPassword').value;
+            
+            // Test the password by making an API call
+            fetch(`${API_BASE_URL}/admin/stats`, {
+                headers: {
+                    'Authorization': `Admin ${adminPassword}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'block';
+                    loadAdminData();
+                } else {
+                    alert('Invalid admin password');
+                }
+            })
+            .catch(error => {
+                alert('Login failed: ' + error.message);
+            });
+        }
+
+        function adminLogout() {
+            adminPassword = '';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        async function loadAdminData() {
+            await loadStats();
+            await loadUsers();
+            await loadPayments();
+            await loadCampaigns();
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/stats`, {
+                    headers: { 'Authorization': `Admin ${adminPassword}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalUsers').textContent = data.stats.users.total;
+                    document.getElementById('activeUsers').textContent = data.stats.users.active;
+                    document.getElementById('totalCampaigns').textContent = data.stats.campaigns;
+                    document.getElementById('totalRevenue').textContent = '₹' + data.stats.revenue.total.toLocaleString('en-IN');
+                }
+            } catch (error) {
+                console.error('Load stats error:', error);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    headers: { 'Authorization': `Admin ${adminPassword}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const html = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Plan</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Last Login</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.users.map(user => `
+                                    <tr>
+                                        <td>${user.name}</td>
+                                        <td>${user.email}</td>
+                                        <td><span class="badge badge-success">${user.plan}</span></td>
+                                        <td><span class="badge ${user.isActive ? 'badge-success' : 'badge-danger'}">${user.isActive ? 'Active' : 'Inactive'}</span></td>
+                                        <td>${new Date(user.createdAt).toLocaleDateString('en-IN')}</td>
+                                        <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('en-IN') : 'Never'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    document.getElementById('usersTable').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Load users error:', error);
+            }
+        }
+
+        async function loadPayments() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/payments`, {
+                    headers: { 'Authorization': `Admin ${adminPassword}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const html = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Plan</th>
+                                    <th>Amount</th>
+                                    <th>Payment ID</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.payments.map(payment => `
+                                    <tr>
+                                        <td>${new Date(payment.createdAt).toLocaleDateString('en-IN')}</td>
+                                        <td>${payment.user.name}<br><small style="color: var(--gray-600);">${payment.user.email}</small></td>
+                                        <td><span class="badge badge-success">${payment.plan}</span></td>
+                                        <td style="font-weight: 600;">₹${(payment.amount / 100).toLocaleString('en-IN')}</td>
+                                        <td style="font-family: monospace; font-size: 0.875rem;">${payment.razorpayPaymentId}</td>
+                                        <td><span class="badge badge-success">${payment.status}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    document.getElementById('paymentsTable').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Load payments error:', error);
+            }
+        }
+
+        async function loadCampaigns() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/campaigns`, {
+                    headers: { 'Authorization': `Admin ${adminPassword}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const html = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Campaign Name</th>
+                                    <th>User</th>
+                                    <th>Event Type</th>
+                                    <th>Status</th>
+                                    <th>Budget</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.campaigns.map(campaign => `
+                                    <tr>
+                                        <td>${campaign.name}</td>
+                                        <td>${campaign.user?.name || 'N/A'}<br><small style="color: var(--gray-600);">${campaign.user?.email || ''}</small></td>
+                                        <td>${campaign.eventType}</td>
+                                        <td><span class="badge badge-${campaign.status === 'active' ? 'success' : 'warning'}">${campaign.status}</span></td>
+                                        <td>₹${campaign.budget?.toLocaleString('en-IN') || 0}</td>
+                                        <td>${new Date(campaign.createdAt).toLocaleDateString('en-IN')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    document.getElementById('campaignsTable').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Load campaigns error:', error);
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.tab').classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+    </script>
+</body>
+</html>
